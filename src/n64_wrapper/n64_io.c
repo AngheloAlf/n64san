@@ -1,4 +1,4 @@
-#include "n64_wrapper/n64_wrapper.h"
+#include "n64_wrapper/n64_io.h"
 
 void* is_proutSyncPrintf(void* arg, const char* str, u32 count);
 s32 _Printf(PrintCallback pfn, void* arg, const char* fmt, va_list ap);
