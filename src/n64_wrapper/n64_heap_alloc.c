@@ -6,7 +6,7 @@ STACK(gN64Wrapper_Heap_Arena, 0x100);
 // The heap
 STACK(gN64Wrapper_Heap_Heap, 0x2000);
 
-#ifdef TARGET_OOT
+#ifdef TARGET_GAME_OOT
 #define __osGetSizes ArenaImpl_GetSizes
 #endif
 

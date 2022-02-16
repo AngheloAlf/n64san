@@ -14,5 +14,10 @@ s32 N64Wrapper_Vsprintf(char* dst, const char* fmt, va_list args);
 void NORETURN N64Wrapper_Abort(const char* file, s32 line);
 void NORETURN N64Wrapper_Die(const char* file, s32 line);
 
+#if SANITIZER_DEBUG
+#define N64Wrapper_DebugPrintf(...) N64Wrapper_Printf("\t N64San DEBUG: " __VA_ARGS__)
+#else
+#define N64Wrapper_DebugPrintf(...)
+#endif
 
 #endif

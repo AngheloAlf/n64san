@@ -4,10 +4,13 @@ MAKEFLAGS += --no-builtin-rules
 
 # if WERROR is 1, compile source files with -Werror
 WERROR ?= 0
+# 
+SAN_DEBUG ?= 0
 
 CFLAGS ?=
 CXXFLAGS ?=
 CPPFLAGS ?=
+COMMON_DEFINES ?=
 
 # Set prefix to mips binutils binaries (mips-linux-gnu-ld => 'mips-linux-gnu-') - Change at your own risk!
 # In nearly all cases, not having 'mips-linux-gnu-*' binaries on the PATH is indicative of missing dependencies
@@ -34,7 +37,7 @@ N_THREADS ?= $(shell nproc)
 
 #### Tools ####
 ifneq ($(shell type $(MIPS_BINUTILS_PREFIX)ld >/dev/null 2>/dev/null; echo $$?), 0)
-  $(error Please install or build $(MIPS_BINUTILS_PREFIX))
+    $(error Please install or build $(MIPS_BINUTILS_PREFIX))
 endif
 
 CC         := $(MIPS_BINUTILS_PREFIX)gcc
@@ -53,7 +56,7 @@ INC        := -Iinclude
 # COMMON_WARNINGS := -Wall -Wextra -Wpedantic -Wshadow -Wvla -Werror=implicit-function-declaration -Wno-format-security -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-variable
 COMMON_WARNINGS := -Wall -Wextra -Wpedantic -Wshadow -Wvla -Werror=implicit-function-declaration
 ifneq ($(WERROR), 0)
-  COMMON_WARNINGS += -Werror
+    COMMON_WARNINGS += -Werror
 endif
 C_WARNINGS      := $(COMMON_WARNINGS) -Wno-int-conversion
 CXX_WARNINGS    := $(COMMON_WARNINGS)
@@ -62,7 +65,10 @@ OPTFLAGS       := -Os -g -fno-zero-initialized-in-bss -fno-toplevel-reorder -fno
 MIPS_VERSION   := -mips3
 ARCH_FLAGS     := -march=vr4300 -mfix4300 -mabi=32
 
-COMMON_DEFINES :=
+COMMON_DEFINES +=
+ifneq ($(SAN_DEBUG), 0)
+    COMMON_DEFINES += -DSANITIZER_DEBUG=1
+endif
 
 COMMON_FLAGS   := -G 0 $(INC) $(COMMON_DEFINES) -funsigned-char -ffreestanding -fno-common -fexec-charset=euc-jp -mno-abicalls -mdivide-breaks -mno-explicit-relocs -mno-split-addresses
 CFLAGS         += $(COMMON_FLAGS) -nostdinc -std=c11 $(C_WARNINGS)
@@ -130,7 +136,7 @@ distclean: clean
 #### Various Recipes ####
 
 lib%.a:
-	$(AR) cro $@ $^
+	$(AR) cr $@ $^
 
 build/asm/%.o: asm/%.s
 	$(AS) $(ASFLAGS) $< -o $@

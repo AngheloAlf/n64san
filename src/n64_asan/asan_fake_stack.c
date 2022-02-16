@@ -11,13 +11,19 @@
 static ALWAYS_INLINE void* OnMalloc(u32 class_id, size_t size) {
     void* ptr;
 
+    N64Wrapper_DebugPrintf("OnMalloc(%i, 0x%X)\n", class_id, size);
+
     if (!N64Wrapper_Heap_IsInitialized()) {
+        N64Wrapper_DebugPrintf("OnMalloc(): Initializing heap\n");
         N64Wrapper_Heap_InitArena();
     }
 
     ptr = N64Wrapper_Heap_Malloc(size);
+    N64Wrapper_DebugPrintf("OnMalloc(): ptr: %X\n", ptr);
 
     (void)class_id;
+
+    N64Wrapper_DebugPrintf("\n");
 
     return ptr;
 }
@@ -25,19 +31,28 @@ static ALWAYS_INLINE void* OnMalloc(u32 class_id, size_t size) {
 static ALWAYS_INLINE void* OnMallocAlways(u32 class_id, size_t size) {
     void* ptr;
 
+    N64Wrapper_DebugPrintf("OnMallocAlways(%i, 0x%X)\n", class_id, size);
+
     if (!N64Wrapper_Heap_IsInitialized()) {
+        N64Wrapper_DebugPrintf("OnMallocAlways(): Initializing heap\n");
         N64Wrapper_Heap_InitArena();
     }
 
     ptr = N64Wrapper_Heap_Malloc(size);
+    N64Wrapper_DebugPrintf("OnMallocAlways(): ptr: %X\n", ptr);
 
     (void)class_id;
+
+    N64Wrapper_DebugPrintf("\n");
 
     return ptr;
 }
 
 static ALWAYS_INLINE void OnFree(void* ptr, u32 class_id, size_t size) {
+    N64Wrapper_DebugPrintf("OnFree(0x%X, %i, 0x%X)\n", ptr, class_id, size);
+
     if (!N64Wrapper_Heap_IsInitialized()) {
+        N64Wrapper_DebugPrintf("OnFree(): Initializing heap\n");
         N64Wrapper_Heap_InitArena();
     }
 
@@ -45,6 +60,8 @@ static ALWAYS_INLINE void OnFree(void* ptr, u32 class_id, size_t size) {
     (void)size;
 
     N64Wrapper_Heap_Free(ptr);
+
+    N64Wrapper_DebugPrintf("\n");
 }
 
 
