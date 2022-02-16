@@ -97,7 +97,7 @@ void NORETURN CheckFailed(const char *file, int line, const char *cond,
     __sanitizer::u64 v1 = (__sanitizer::u64)(c1); \
     __sanitizer::u64 v2 = (__sanitizer::u64)(c2); \
     if (UNLIKELY(!(v1 op v2))) \
-      __sanitizer::CheckFailed(__FILE__, __LINE__, \
+      CheckFailed(__FILE__, __LINE__, \
         "(" #c1 ") " #op " (" #c2 ")", v1, v2); \
   } while (false) \
 /**/
