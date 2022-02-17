@@ -4,15 +4,14 @@
 #include "n64_utils.h"
 
 
+void N64Wrapper_Vprintf(const char* fmt, va_list args);
+
 void N64Wrapper_Printf(const char *fmt, ...);
 // Like Printf, but prints the current PID before the output string.
 void N64Wrapper_Report(const char *fmt, ...);
 
 s32 N64Wrapper_Vsprintf(char* dst, const char* fmt, va_list args);
 
-
-void NORETURN N64Wrapper_Abort(const char* file, s32 line);
-void NORETURN N64Wrapper_Die(const char* file, s32 line);
 
 #if SANITIZER_DEBUG
 #define N64Wrapper_DebugPrintf(...) N64Wrapper_Printf("\t N64San DEBUG: " __VA_ARGS__)

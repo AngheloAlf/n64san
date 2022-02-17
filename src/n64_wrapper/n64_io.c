@@ -5,15 +5,16 @@ s32 _Printf(PrintCallback pfn, void* arg, const char* fmt, va_list ap);
 
 s32 vsprintf(char* dst, const char* fmt, va_list args);
 
-void NORETURN __assert(const char* exp, const char* file, s32 line);
-
+void N64Wrapper_Vprintf(const char* fmt, va_list args) {
+    _Printf(is_proutSyncPrintf, NULL, fmt, args);
+}
 
 void N64Wrapper_Printf(const char *fmt, ...) {
     // Same definition as osSyncPrintf
     va_list args;
     va_start(args, fmt);
 
-    _Printf(is_proutSyncPrintf, NULL, fmt, args);
+    N64Wrapper_Vprintf(fmt, args);
 
     va_end(args);
 }
@@ -25,21 +26,11 @@ void N64Wrapper_Report(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    _Printf(is_proutSyncPrintf, NULL, fmt, args);
+    N64Wrapper_Vprintf(fmt, args);
 
     va_end(args);
 }
 
 s32 N64Wrapper_Vsprintf(char* dst, const char* fmt, va_list args) {
     return vsprintf(dst, fmt, args);
-}
-
-
-
-void N64Wrapper_Abort(const char* file, s32 line) {
-    __assert("ASAN Abort", file, line);
-}
-
-void N64Wrapper_Die(const char* file, s32 line) {
-    __assert("ASAN Die", file, line);
 }

@@ -3,7 +3,8 @@
 
 #include "n64_utils.h"
 #include "alignment.h"
-#include "n64_io.h"
 #include "n64_heap_alloc.h"
+#include "n64_io.h"
+#include "n64_termination.h"
 
 #endif
