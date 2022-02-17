@@ -13,6 +13,19 @@
 
 
 
+/****************************************************************************\\
+|
+| TypeMismatch
+|
+|  Diagnoses .
+|
+| Enabled by:
+|  -fsanitize=null
+|  -fsanitize=alignment
+|  -fsanitize=object-size
+|
+\\****************************************************************************/
+
 /// Situations in which we might emit a check for the suitability of a
 /// pointer or glvalue. Needs to be kept in sync with CodeGenFunction.h in
 /// clang.
@@ -58,7 +71,6 @@ const char *TypeCheckKinds[] = {
     "upcast of", "cast to virtual base of", "_Nonnull binding to",
     "dynamic operation on"
 };
-
 
 static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
                                    ReportOptions Opts) {
@@ -116,8 +128,6 @@ static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
 #endif
 }
 
-
-
 void __ubsan_handle_type_mismatch_v1(TypeMismatchData *Data,
                                               ValueHandle Pointer) {
   GET_REPORT_OPTIONS(false);
@@ -129,6 +139,13 @@ void __ubsan_handle_type_mismatch_v1_abort(TypeMismatchData *Data,
   handleTypeMismatchImpl(Data, Pointer, Opts);
   Die();
 }
+
+/****************************************************************************\\
+|
+| TypeMismatch
+|
+\\****************************************************************************/
+
 
 
 // TODO
@@ -150,6 +167,18 @@ void __ubsan_handle_alignment_assumption_abort(
 #endif
 
 
+
+/****************************************************************************\\
+|
+| IntegerOverflow
+|
+|  Diagnoses integer overflow for +, - and * operations.
+|
+|
+| Enabled by:
+|  -fsanitize=signed-integer-overflow
+|
+\\****************************************************************************/
 
 /// \brief Common diagnostic emission for various forms of integer overflow.
 static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS,
@@ -177,7 +206,6 @@ static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS,
     Ubsan_Diag(&Loc, DL_Error, ET, "%s integer overflow: %i %s %i cannot be represented in type %s", (IsSigned ? "signed" : "unsigned"), LHS, Operator, RHS, Data->Type->TypeName);
 }
 
-
 #define UBSAN_OVERFLOW_HANDLER(handler_name, op, unrecoverable)                \
   void handler_name(OverflowData *Data, ValueHandle LHS,              \
                              ValueHandle RHS) {                                \
@@ -194,7 +222,25 @@ UBSAN_OVERFLOW_HANDLER(__ubsan_handle_sub_overflow_abort, "-", true)
 UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow, "*", false)
 UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow_abort, "*", true)
 
+/****************************************************************************\\
+|
+| IntegerOverflow
+|
+\\****************************************************************************/
 
+
+
+
+/****************************************************************************\\
+|
+| NegateOverflow
+|
+|  Diagnoses integer overflow for unary -.
+|
+| Enabled by:
+|  -fsanitize=signed-integer-overflow
+|
+\\****************************************************************************/
 
 static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal,
                                      ReportOptions Opts) {
@@ -222,7 +268,6 @@ static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal,
     }
 }
 
-
 void __ubsan_handle_negate_overflow(OverflowData *Data,
                                              ValueHandle OldVal) {
   GET_REPORT_OPTIONS(false);
@@ -235,7 +280,25 @@ void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
   Die();
 }
 
+/****************************************************************************\\
+|
+| NegateOverflow
+|
+\\****************************************************************************/
 
+
+
+/****************************************************************************\\
+|
+| DivremOverflow
+|
+|  Diagnoses division by zero and signed integer division overflow.
+|
+| Enabled by:
+|  -fsanitize=integer-divide-by-zero
+|  -fsanitize=float-divide-by-zero
+|
+\\****************************************************************************/
 
 static void handleDivremOverflowImpl(OverflowData *Data, ValueHandle LHS,
                                      ValueHandle RHS, ReportOptions Opts) {
@@ -287,7 +350,27 @@ void __ubsan_handle_divrem_overflow_abort(OverflowData *Data,
   Die();
 }
 
+/****************************************************************************\\
+|
+| DivremOverflow
+|
+\\****************************************************************************/
 
+
+
+
+/****************************************************************************\\
+|
+| ShiftOutOfBounds
+|
+|  Diagnoses shifts operations that may not be properly defined.
+|
+| Enabled by:
+|  -fsanitize=shift
+|  -fsanitize=shift-exponent
+|  -fsanitize=shift-base
+|
+\\****************************************************************************/
 
 static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data,
                                        ValueHandle LHS, ValueHandle RHS,
@@ -326,7 +409,6 @@ static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data,
     }
 }
 
-
 void __ubsan_handle_shift_out_of_bounds(ShiftOutOfBoundsData *Data,
                                                  ValueHandle LHS,
                                                  ValueHandle RHS) {
@@ -342,6 +424,27 @@ void __ubsan_handle_shift_out_of_bounds_abort(
   Die();
 }
 
+/****************************************************************************\\
+|
+| ShiftOutOfBounds
+|
+\\****************************************************************************/
+
+
+
+
+
+/****************************************************************************\\
+|
+| OutOfBounds
+|
+|  Diagnoses out of bound (OoB) accesses for classic arrays.
+|
+| Enabled by:
+|  -fsanitize=bounds
+|  -fsanitize=bounds-strict
+|
+\\****************************************************************************/
 
 static void handleOutOfBoundsImpl(OutOfBoundsData *Data, ValueHandle Index,
                                   ReportOptions Opts) {
@@ -372,6 +475,12 @@ void __ubsan_handle_out_of_bounds_abort(OutOfBoundsData *Data,
     handleOutOfBoundsImpl(Data, Index, Opts);
     Die();
 }
+
+/****************************************************************************\\
+|
+| OutOfBounds
+|
+\\****************************************************************************/
 
 
 
@@ -406,6 +515,17 @@ void __ubsan_handle_vla_bound_not_positive_abort(VLABoundData *Data,
 
 
 
+/****************************************************************************\\
+|
+| FloatCastOverflow
+|
+|  Diagnoses floating-point type to integer conversion overflow.
+|
+| Enabled by:
+|  -fsanitize=float-cast-overflow
+|
+\\****************************************************************************/
+
 void __ubsan_handle_float_cast_overflow(void *Data, ValueHandle From) {
   GET_REPORT_OPTIONS(false);
   handleFloatCastOverflow(Data, From, Opts);
@@ -416,6 +536,13 @@ void __ubsan_handle_float_cast_overflow_abort(void *Data,
   handleFloatCastOverflow(Data, From, Opts);
   Die();
 }
+
+/****************************************************************************\\
+|
+| FloatCastOverflow
+|
+\\****************************************************************************/
+
 
 
 void __ubsan_handle_load_invalid_value(InvalidValueData *Data,
@@ -520,6 +647,20 @@ void __ubsan_handle_nullability_arg_abort(NonNullArgData *Data) {
 }
 #endif
 
+
+
+
+/****************************************************************************\\
+|
+| PointerOverflow
+|
+|  Diagnoses pointer arithmetic overflow.
+|
+| Enabled by:
+|  -fsanitize=pointer-overflow
+|
+\\****************************************************************************/
+
 static void handlePointerOverflowImpl(PointerOverflowData *Data,
                                       ValueHandle Base,
                                       ValueHandle Result,
@@ -577,6 +718,14 @@ void __ubsan_handle_pointer_overflow_abort(PointerOverflowData *Data,
   handlePointerOverflowImpl(Data, Base, Result, Opts);
   Die();
 }
+
+/****************************************************************************\\
+|
+| PointerOverflow
+|
+\\****************************************************************************/
+
+
 
 
 #if 0
