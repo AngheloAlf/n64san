@@ -82,16 +82,25 @@ ASFLAGS        := -march=vr4300 -32 -Iinclude
 
 #### Files ####
 
-SRC_DIRS_N64_COMMON          := $(shell find src/n64_sanitizer_common -type d)
+SRC_DIRS_N64_SAN_COMMON      := $(shell find src/n64_sanitizer_common -type d)
 
-SRC_DIRS_N64_ASAN            := $(shell find src/n64_asan -type d) $(SRC_DIRS_N64_COMMON)
-SRC_DIRS_N64_UBSAN           := $(shell find src/n64_ubsan -type d) $(SRC_DIRS_N64_COMMON)
+SRC_DIRS_N64_ASAN            := $(shell find src/n64_asan -type d) $(SRC_DIRS_N64_SAN_COMMON)
+SRC_DIRS_N64_UBSAN           := $(shell find src/n64_ubsan -type d) $(SRC_DIRS_N64_SAN_COMMON)
 SRC_DIRS_N64_WRAPPER         := $(shell find src/n64_wrapper -type d)
 
 SRC_DIRS_ALL                 := $(SRC_DIRS_N64_ASAN) $(SRC_DIRS_N64_UBSAN) $(SRC_DIRS_N64_WRAPPER)
 
-# TODO?
-ASM_DIRS_ALL                 := 
+
+ASM_DIRS_N64_SAN_COMMON      := $(shell find asm/n64_sanitizer_common -type d)
+
+# ASM_DIRS_N64_ASAN            := $(shell find asm/n64_asan -type d) $(ASM_DIRS_N64_SAN_COMMON)
+ASM_DIRS_N64_ASAN            := $(ASM_DIRS_N64_SAN_COMMON)
+# ASM_DIRS_N64_UBSAN           := $(shell find asm/n64_ubsan -type d) $(ASM_DIRS_N64_SAN_COMMON)
+ASM_DIRS_N64_UBSAN           := $(ASM_DIRS_N64_SAN_COMMON)
+# ASM_DIRS_N64_WRAPPER         := $(shell find asm/n64_wrapper -type d)
+ASM_DIRS_N64_WRAPPER         := 
+
+ASM_DIRS_ALL                 := $(ASM_DIRS_N64_ASAN) $(ASM_DIRS_N64_UBSAN) $(ASM_DIRS_N64_WRAPPER)
 
 
 # source files

@@ -10,4 +10,6 @@
 #define NORETURN  __attribute__((noreturn))
 #endif
 
+#define GAME_INTERNAL_FUNCTION
+
 #endif

@@ -177,6 +177,46 @@ void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
   handleNegateOverflowImpl(Data, OldVal, Opts);
   Die();
 }
+#endif
+
+
+
+static void handleDivremOverflowImpl(OverflowData *Data, ValueHandle LHS,
+                                     ValueHandle RHS, ReportOptions Opts) {
+    Ubsan_Location Loc = { LK_Source, { Data->Loc } };
+
+    ErrorType ET;
+    if (Ubsan_Value_isMinusOne(Data->Type, RHS))
+        ET = ErrorType_SignedIntegerOverflow;
+    else if (TypeDescriptor_isIntegerTy(Data->Type))
+        ET = ErrorType_IntegerDivideByZero;
+    else
+        ET = ErrorType_FloatDivideByZero;
+
+    #if 0
+    if (ignoreReport(Loc, Opts, ET))
+        return;
+
+    ScopedReport R(Opts, Loc, ET);
+    #else
+        (void)Opts;
+    #endif
+
+    switch (ET) {
+    case ErrorType_SignedIntegerOverflow:
+        Ubsan_Diag(&Loc, DL_Error, ET, "division of %i by -1 cannot be represented in type %s", LHS, Data->Type->TypeName);
+        break;
+
+    case ErrorType_IntegerDivideByZero:
+    case ErrorType_FloatDivideByZero:
+        Ubsan_Diag(&Loc, DL_Error, ET, "division by zero");
+        break;
+
+    default:
+        UNREACHABLE("unexpected error type!");
+        break;
+    }
+}
 
 void __ubsan_handle_divrem_overflow(OverflowData *Data,
                                              ValueHandle LHS, ValueHandle RHS) {
@@ -189,6 +229,45 @@ void __ubsan_handle_divrem_overflow_abort(OverflowData *Data,
   GET_REPORT_OPTIONS(true);
   handleDivremOverflowImpl(Data, LHS, RHS, Opts);
   Die();
+}
+
+
+
+static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data,
+                                       ValueHandle LHS, ValueHandle RHS,
+                                       ReportOptions Opts) {
+    Ubsan_Location Loc = { LK_Source, { Data->Loc } };
+
+    ErrorType ET;
+    if (Ubsan_Value_isNegative(Data->RHSType, RHS) ||
+        Ubsan_Value_getPositiveIntValue(Data->RHSType, RHS) >= TypeDescriptor_getIntegerBitWidth(Data->LHSType))
+        ET = ErrorType_InvalidShiftExponent;
+    else
+        ET = ErrorType_InvalidShiftBase;
+
+#if 0
+    if (ignoreReport(Loc, Opts, ET))
+        return;
+
+    ScopedReport R(Opts, Loc, ET);
+#else
+    (void)Opts;
+#endif
+
+    if (ET == ErrorType_InvalidShiftExponent) {
+        if (Ubsan_Value_isNegative(Data->RHSType, RHS)) {
+            Ubsan_Diag(&Loc, DL_Error, ET, "shift exponent %i is negative", RHS);
+        } else {
+            Ubsan_Diag(&Loc, DL_Error, ET, "shift exponent %i is too large for %i-bit type %s", RHS, TypeDescriptor_getIntegerBitWidth(Data->LHSType), Data->LHSType->TypeName);
+        }
+    } else {
+        if (Ubsan_Value_isNegative(Data->LHSType, LHS)) {
+            Ubsan_Diag(&Loc, DL_Error, ET, "left shift of negative value %i", LHS);
+        } else {
+            Ubsan_Diag(&Loc, DL_Error, ET,
+                "left shift of %i by %i places cannot be represented in type %s", LHS, RHS, Data->LHSType->TypeName);
+        }
+    }
 }
 
 
@@ -206,7 +285,6 @@ void __ubsan_handle_shift_out_of_bounds_abort(
   handleShiftOutOfBoundsImpl(Data, LHS, RHS, Opts);
   Die();
 }
-#endif
 
 
 static void handleOutOfBoundsImpl(OutOfBoundsData *Data, ValueHandle Index,
