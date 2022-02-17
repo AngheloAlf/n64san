@@ -147,13 +147,42 @@ void __ubsan_handle_alignment_assumption_abort(
   handleAlignmentAssumptionImpl(Data, Pointer, Alignment, Offset, Opts);
   Die();
 }
+#endif
+
+
+
+/// \brief Common diagnostic emission for various forms of integer overflow.
+static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS,
+                                      const char *Operator, ValueHandle RHS,
+                                      ReportOptions Opts) {
+    Ubsan_Location Loc = { LK_Source, { Data->Loc } };
+    bool IsSigned = TypeDescriptor_isSignedIntegerTy(Data->Type);
+    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow
+                            : ErrorType_UnsignedIntegerOverflow;
+
+#if 0
+    if (ignoreReport(Loc, Opts, ET))
+        return;
+
+    // If this is an unsigned overflow in non-fatal mode, potentially ignore it.
+    if (!IsSigned && !Opts.FromUnrecoverableHandler &&
+        flags()->silence_unsigned_overflow)
+        return;
+
+    ScopedReport R(Opts, Loc, ET);
+#else
+    (void)Opts;
+#endif
+
+    Ubsan_Diag(&Loc, DL_Error, ET, "%s integer overflow: %i %s %i cannot be represented in type %s", (IsSigned ? "signed" : "unsigned"), LHS, Operator, RHS, Data->Type->TypeName);
+}
 
 
 #define UBSAN_OVERFLOW_HANDLER(handler_name, op, unrecoverable)                \
   void handler_name(OverflowData *Data, ValueHandle LHS,              \
                              ValueHandle RHS) {                                \
     GET_REPORT_OPTIONS(unrecoverable);                                         \
-    handleIntegerOverflowImpl(Data, LHS, op, Value(Data->Type, RHS), Opts);    \
+    handleIntegerOverflowImpl(Data, LHS, op, RHS, Opts);    \
     if (unrecoverable)                                                         \
       Die();                                                                   \
   }
@@ -166,6 +195,8 @@ UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow, "*", false)
 UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow_abort, "*", true)
 
 
+
+#if 0
 void __ubsan_handle_negate_overflow(OverflowData *Data,
                                              ValueHandle OldVal) {
   GET_REPORT_OPTIONS(false);
