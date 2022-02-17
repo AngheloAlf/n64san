@@ -99,12 +99,12 @@ static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
     Ubsan_Diag(&Loc, DL_Error, ET, "%s null pointer of type %s", TypeCheckKinds[Data->TypeCheckKind], Data->Type->TypeName);
     break;
   case ErrorType_MisalignedPointerUse:
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s misaligned address %X for type %s, "
+    Ubsan_Diag(&Loc, DL_Error, ET, "%s misaligned address 0x%X for type %s, "
                         "which requires %i byte alignment", TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName, Alignment);
     break;
   case ErrorType_InsufficientObjectSize:
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s address %X with insufficient space "
-                        "for an object of type %i", TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName);
+    Ubsan_Diag(&Loc, DL_Error, ET, "%s address 0x%X with insufficient space "
+                        "for an object of type %s", TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName);
     break;
   default:
     UNREACHABLE("unexpected error type!");
