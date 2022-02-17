@@ -196,7 +196,33 @@ UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow_abort, "*", true)
 
 
 
-#if 0
+static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal,
+                                     ReportOptions Opts) {
+    Ubsan_Location Loc = { LK_Source, { Data->Loc } };
+    bool IsSigned = TypeDescriptor_isSignedIntegerTy(Data->Type);
+    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow
+                            : ErrorType_UnsignedIntegerOverflow;
+
+    #if 0
+    if (ignoreReport(Loc, Opts, ET))
+        return;
+
+    if (!IsSigned && flags()->silence_unsigned_overflow)
+        return;
+
+    ScopedReport R(Opts, Loc, ET);
+    #else
+        (void)Opts;
+    #endif
+
+    if (IsSigned) {
+        Ubsan_Diag(&Loc, DL_Error, ET, "negation of %i cannot be represented in type %s; cast to an unsigned type to negate this value to itself", OldVal, Data->Type->TypeName);
+    } else {
+        Ubsan_Diag(&Loc, DL_Error, ET, "negation of %i cannot be represented in type %s", OldVal, Data->Type->TypeName);
+    }
+}
+
+
 void __ubsan_handle_negate_overflow(OverflowData *Data,
                                              ValueHandle OldVal) {
   GET_REPORT_OPTIONS(false);
@@ -208,7 +234,6 @@ void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
   handleNegateOverflowImpl(Data, OldVal, Opts);
   Die();
 }
-#endif
 
 
 
