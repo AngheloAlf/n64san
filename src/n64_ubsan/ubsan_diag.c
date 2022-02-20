@@ -9,8 +9,6 @@
 
 #include "n64_wrapper/n64_wrapper.h"
 
-
-
 void Ubsan_PrintSourceLocation(const char *file, int line, int column, bool vs_style) {
     N64Wrapper_Printf("%s", file);
 
@@ -32,23 +30,21 @@ void Ubsan_PrintSourceLocation(const char *file, int line, int column, bool vs_s
     }
 }
 
-
-
 void Ubsan_Location_Print(Ubsan_Location *loc) {
     switch (loc->Kind) {
-    case LK_Source: {
-        SourceLocation* SLoc = &loc->SourceLoc;
-        if (SLoc->Filename == NULL) {
-            N64Wrapper_Printf("<unknown>");
-        } else {
-            Ubsan_PrintSourceLocation(SLoc->Filename, SLoc->Line, SLoc->Column, false);
+        case LK_Source: {
+            SourceLocation *SLoc = &loc->SourceLoc;
+            if (SLoc->Filename == NULL) {
+                N64Wrapper_Printf("<unknown>");
+            } else {
+                Ubsan_PrintSourceLocation(SLoc->Filename, SLoc->Line, SLoc->Column, false);
+            }
+            break;
         }
-        break;
-    }
 
-    case LK_Memory:
-        N64Wrapper_Printf("%p", loc->MemoryLoc);
-        break;
+        case LK_Memory:
+            N64Wrapper_Printf("%p", loc->MemoryLoc);
+            break;
 
 // TODO
 #if 0
@@ -67,18 +63,16 @@ void Ubsan_Location_Print(Ubsan_Location *loc) {
     }
 #endif
 
-    case LK_Null:
-        N64Wrapper_Printf("<unknown>");
-        break;
+        case LK_Null:
+            N64Wrapper_Printf("<unknown>");
+            break;
 
-    default:
-        UNREACHABLE("Ubsan_Location_Print(): Something went wrong");
+        default:
+            UNREACHABLE("Ubsan_Location_Print(): Something went wrong");
     }
 }
 
-
-
-void Ubsan_DiagImpl(Ubsan_Location *loc, DiagLevel level, ErrorType et, const char* fmt, va_list args) {
+void Ubsan_DiagImpl(Ubsan_Location *loc, DiagLevel level, ErrorType et, const char *fmt, va_list args) {
 #if 0
     Decorator Decor;
     InternalScopedString Buffer;
@@ -86,7 +80,6 @@ void Ubsan_DiagImpl(Ubsan_Location *loc, DiagLevel level, ErrorType et, const ch
 
     // TODO: print et
     (void)et;
-
 
 #if 0
     Buffer.append("%s", Decor.Bold());
@@ -98,21 +91,21 @@ void Ubsan_DiagImpl(Ubsan_Location *loc, DiagLevel level, ErrorType et, const ch
     N64Wrapper_Printf(":");
 
     switch (level) {
-    case DL_Error:
-        // TODO: use preprocessor's string concat
-        N64Wrapper_Printf("%s runtime error: %s%s", VT_BOLD_FGCOL(RED), VT_RST, VT_BOLD());
-        #if 0
+        case DL_Error:
+            // TODO: use preprocessor's string concat
+            N64Wrapper_Printf("%s runtime error: %s%s", VT_BOLD_FGCOL(RED), VT_RST, VT_BOLD());
+#if 0
         Buffer.append("%s runtime error: %s%s", Decor.Warning(), Decor.Default(),
                     Decor.Bold());
-        #endif
-        break;
+#endif
+            break;
 
-    case DL_Note:
-        N64Wrapper_Printf("%s note: %s", VT_BOLD_FGCOL(BLACK), VT_RST);
-        #if 0
+        case DL_Note:
+            N64Wrapper_Printf("%s note: %s", VT_BOLD_FGCOL(BLACK), VT_RST);
+#if 0
         Buffer.append("%s note: %s", Decor.Note(), Decor.Default());
-        #endif
-        break;
+#endif
+            break;
     }
 
 #if 0

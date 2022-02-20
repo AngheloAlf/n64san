@@ -3,7 +3,7 @@
 
 #include "ultra64/types.h"
 
-void* alloca(u32);
-#define alloca  __builtin_alloca
+void *alloca(u32);
+#define alloca __builtin_alloca
 
 #endif

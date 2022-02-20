@@ -2,13 +2,12 @@
 
 #if TARGET_GAME_OOT
 
-GAME_INTERNAL_FUNCTION void* is_proutSyncPrintf(void* arg, const char* str, u32 count);
-GAME_INTERNAL_FUNCTION s32 _Printf(PrintCallback pfn, void* arg, const char* fmt, va_list ap);
+GAME_INTERNAL_FUNCTION void *is_proutSyncPrintf(void *arg, const char *str, u32 count);
+GAME_INTERNAL_FUNCTION s32 _Printf(PrintCallback pfn, void *arg, const char *fmt, va_list ap);
 
-GAME_INTERNAL_FUNCTION s32 vsprintf(char* dst, const char* fmt, va_list args);
+GAME_INTERNAL_FUNCTION s32 vsprintf(char *dst, const char *fmt, va_list args);
 
-
-void N64Wrapper_Vprintf(const char* fmt, va_list args) {
+void N64Wrapper_Vprintf(const char *fmt, va_list args) {
     _Printf(is_proutSyncPrintf, NULL, fmt, args);
 }
 
@@ -33,11 +32,11 @@ void N64Wrapper_Report(const char *fmt, ...) {
     va_end(args);
 }
 
-s32 N64Wrapper_Vsprintf(char* dst, const char* fmt, va_list args) {
+s32 N64Wrapper_Vsprintf(char *dst, const char *fmt, va_list args) {
     return vsprintf(dst, fmt, args);
 }
 
-s32 N64Wrapper_Sprintf(char* dst, const char* fmt, ...) {
+s32 N64Wrapper_Sprintf(char *dst, const char *fmt, ...) {
     s32 ret;
     va_list args;
     va_start(args, fmt);

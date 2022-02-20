@@ -5,10 +5,10 @@
 
 #include "n64_utils.h"
 
-void* N64Wrapper_Heap_Malloc(size_t size);
-void* N64Wrapper_Heap_Realloc(void* oldPtr, size_t newSize);
-void N64Wrapper_Heap_Free(void* ptr);
-void* N64Wrapper_Heap_Calloc(u32 elements, size_t size);
+void *N64Wrapper_Heap_Malloc(size_t size);
+void *N64Wrapper_Heap_Realloc(void *oldPtr, size_t newSize);
+void N64Wrapper_Heap_Free(void *ptr);
+void *N64Wrapper_Heap_Calloc(u32 elements, size_t size);
 // void N64Wrapper_Heap_GetSizes(size_t* maxFreeBlock, size_t* bytesFree, size_t* bytesAllocated);
 // u32 N64Wrapper_Heap_CheckArena(void);
 void N64Wrapper_Heap_InitArena();
@@ -19,7 +19,7 @@ bool N64Wrapper_Heap_IsInitialized(void);
 #define N64WRAPPER_HEAP_ARENASIZE 0x100
 #endif
 #ifndef N64WRAPPER_HEAP_HEAPSIZE
-#define N64WRAPPER_HEAP_HEAPSIZE  0x2000
+#define N64WRAPPER_HEAP_HEAPSIZE 0x2000
 #endif
 
 #endif /* ENABLE_N64WRAPPER_HEAP_ALLOC */

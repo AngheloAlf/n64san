@@ -2,9 +2,8 @@
 
 #if TARGET_GAME_OOT
 
-GAME_INTERNAL_FUNCTION void* memcpy(void* dst, const void* src, size_t size);
-GAME_INTERNAL_FUNCTION void bzero(void* begin, size_t length);
-
+GAME_INTERNAL_FUNCTION void *memcpy(void *dst, const void *src, size_t size);
+GAME_INTERNAL_FUNCTION void bzero(void *begin, size_t length);
 
 void *N64Wrapper_Memcpy(void *dst, const void *src, size_t n) {
     return memcpy(dst, src, n);

@@ -5,7 +5,6 @@
 
 #include "n64_wrapper/n64_wrapper.h"
 
-
 void NORETURN Die() {
     N64Wrapper_Assert("SAN: Die()\n", __FILE__, __LINE__);
 }
@@ -15,13 +14,11 @@ tid_t GetTid() {
     return 0;
 }
 
-void NORETURN CheckFailed(const char *file, int line, const char *cond,
-                          u64 v1, u64 v2) {
+void NORETURN CheckFailed(const char *file, int line, const char *cond, u64 v1, u64 v2) {
     u32 tid = GetTid();
 
-    N64Wrapper_Printf("%s: CHECK failed: %s:%d \"%s\" (0x%zx, 0x%zx) (tid=%u)\n",
-            SanitizerToolName, file, line, cond, v1,
-            v2, tid);
+    N64Wrapper_Printf("%s: CHECK failed: %s:%d \"%s\" (0x%zx, 0x%zx) (tid=%u)\n", SanitizerToolName, file, line, cond,
+                      v1, v2, tid);
 
     N64Wrapper_Assert(cond, file, line);
 }

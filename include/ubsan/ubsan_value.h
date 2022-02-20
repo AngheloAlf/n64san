@@ -9,7 +9,6 @@
 #include "sanitizer_common/sanitizer_internal_defs.h"
 #include "global_headers/unk.h"
 
-
 typedef s64 SIntMax;
 typedef u64 UIntMax;
 
@@ -20,7 +19,6 @@ typedef struct SourceLocation {
     u32 Line;
     u32 Column;
 } SourceLocation;
-
 
 typedef struct TypeDescriptor {
     u16 TypeKind;
@@ -42,13 +40,12 @@ typedef enum TypeDescriptor_Kind {
     TK_Unknown = 0xffff
 } TypeDescriptor_Kind;
 
-bool TypeDescriptor_isIntegerTy(const TypeDescriptor* typeDescr);
-bool TypeDescriptor_isSignedIntegerTy(const TypeDescriptor* typeDescr);
-bool TypeDescriptor_isUnsignedIntegerTy(const TypeDescriptor* typeDescr);
-unsigned TypeDescriptor_getIntegerBitWidth(const TypeDescriptor* typeDescr);
-bool TypeDescriptor_isFloatTy(const TypeDescriptor* typeDescr);
-unsigned TypeDescriptor_getFloatBitWidth(const TypeDescriptor* typeDescr);
-
+bool TypeDescriptor_isIntegerTy(const TypeDescriptor *typeDescr);
+bool TypeDescriptor_isSignedIntegerTy(const TypeDescriptor *typeDescr);
+bool TypeDescriptor_isUnsignedIntegerTy(const TypeDescriptor *typeDescr);
+unsigned TypeDescriptor_getIntegerBitWidth(const TypeDescriptor *typeDescr);
+bool TypeDescriptor_isFloatTy(const TypeDescriptor *typeDescr);
+unsigned TypeDescriptor_getFloatBitWidth(const TypeDescriptor *typeDescr);
 
 typedef uintptr_t ValueHandle;
 
@@ -69,6 +66,5 @@ bool Ubsan_Value_isNegative(const TypeDescriptor *Type, ValueHandle Val);
 
 /// \brief Get this value as a floating-point quantity.
 FloatMax Ubsan_Value_getFloatValue(const TypeDescriptor *Type, ValueHandle Val);
-
 
 #endif

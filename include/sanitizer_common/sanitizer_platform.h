@@ -17,4 +17,4 @@
 // 0 - THREADLOCAL macro is not supported by target
 #define SANITIZER_SUPPORTS_THREADLOCAL 0
 
-#endif  // SANITIZER_PLATFORM_H
+#endif // SANITIZER_PLATFORM_H

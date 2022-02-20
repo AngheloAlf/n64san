@@ -13,7 +13,6 @@
 
 #include "n64_wrapper/n64_wrapper.h"
 
-
 /****************************************************************************\\
 |
 | TypeMismatch
@@ -31,63 +30,69 @@
 /// pointer or glvalue. Needs to be kept in sync with CodeGenFunction.h in
 /// clang.
 enum TypeCheckKind {
-  /// Checking the operand of a load. Must be suitably sized and aligned.
-  TCK_Load,
-  /// Checking the destination of a store. Must be suitably sized and aligned.
-  TCK_Store,
-  /// Checking the bound value in a reference binding. Must be suitably sized
-  /// and aligned, but is not required to refer to an object (until the
-  /// reference is used), per core issue 453.
-  TCK_ReferenceBinding,
-  /// Checking the object expression in a non-static data member access. Must
-  /// be an object within its lifetime.
-  TCK_MemberAccess,
-  /// Checking the 'this' pointer for a call to a non-static member function.
-  /// Must be an object within its lifetime.
-  TCK_MemberCall,
-  /// Checking the 'this' pointer for a constructor call.
-  TCK_ConstructorCall,
-  /// Checking the operand of a static_cast to a derived pointer type. Must be
-  /// null or an object within its lifetime.
-  TCK_DowncastPointer,
-  /// Checking the operand of a static_cast to a derived reference type. Must
-  /// be an object within its lifetime.
-  TCK_DowncastReference,
-  /// Checking the operand of a cast to a base object. Must be suitably sized
-  /// and aligned.
-  TCK_Upcast,
-  /// Checking the operand of a cast to a virtual base object. Must be an
-  /// object within its lifetime.
-  TCK_UpcastToVirtualBase,
-  /// Checking the value assigned to a _Nonnull pointer. Must not be null.
-  TCK_NonnullAssign,
-  /// Checking the operand of a dynamic_cast or a typeid expression.  Must be
-  /// null or an object within its lifetime.
-  TCK_DynamicOperation
+    /// Checking the operand of a load. Must be suitably sized and aligned.
+    TCK_Load,
+    /// Checking the destination of a store. Must be suitably sized and aligned.
+    TCK_Store,
+    /// Checking the bound value in a reference binding. Must be suitably sized
+    /// and aligned, but is not required to refer to an object (until the
+    /// reference is used), per core issue 453.
+    TCK_ReferenceBinding,
+    /// Checking the object expression in a non-static data member access. Must
+    /// be an object within its lifetime.
+    TCK_MemberAccess,
+    /// Checking the 'this' pointer for a call to a non-static member function.
+    /// Must be an object within its lifetime.
+    TCK_MemberCall,
+    /// Checking the 'this' pointer for a constructor call.
+    TCK_ConstructorCall,
+    /// Checking the operand of a static_cast to a derived pointer type. Must be
+    /// null or an object within its lifetime.
+    TCK_DowncastPointer,
+    /// Checking the operand of a static_cast to a derived reference type. Must
+    /// be an object within its lifetime.
+    TCK_DowncastReference,
+    /// Checking the operand of a cast to a base object. Must be suitably sized
+    /// and aligned.
+    TCK_Upcast,
+    /// Checking the operand of a cast to a virtual base object. Must be an
+    /// object within its lifetime.
+    TCK_UpcastToVirtualBase,
+    /// Checking the value assigned to a _Nonnull pointer. Must not be null.
+    TCK_NonnullAssign,
+    /// Checking the operand of a dynamic_cast or a typeid expression.  Must be
+    /// null or an object within its lifetime.
+    TCK_DynamicOperation
 };
 
 const char *TypeCheckKinds[] = {
-    "load of", "store to", "reference binding to", "member access within",
-    "member call on", "constructor call on", "downcast of", "downcast of",
-    "upcast of", "cast to virtual base of", "_Nonnull binding to",
-    "dynamic operation on"
+    "load of",
+    "store to",
+    "reference binding to",
+    "member access within",
+    "member call on",
+    "constructor call on",
+    "downcast of",
+    "downcast of",
+    "upcast of",
+    "cast to virtual base of",
+    "_Nonnull binding to",
+    "dynamic operation on",
 };
 
-static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
-                                   ReportOptions Opts) {
+static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer, ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
 
-
-  uptr Alignment = (uptr)1 << Data->LogAlignment;
-  ErrorType ET;
-  if (Pointer == 0)
-    ET = (Data->TypeCheckKind == TCK_NonnullAssign)
-             ? ErrorType_NullPointerUseWithNullability
-             : ErrorType_NullPointerUse;
-  else if (Pointer & (Alignment - 1))
-    ET = ErrorType_MisalignedPointerUse;
-  else
-    ET = ErrorType_InsufficientObjectSize;
+    uptr Alignment = (uptr)1 << Data->LogAlignment;
+    ErrorType ET;
+    if (Pointer == 0) {
+        ET = (Data->TypeCheckKind == TCK_NonnullAssign) ? ErrorType_NullPointerUseWithNullability
+                                                        : ErrorType_NullPointerUse;
+    } else if (Pointer & (Alignment - 1)) {
+        ET = ErrorType_MisalignedPointerUse;
+    } else {
+        ET = ErrorType_InsufficientObjectSize;
+    }
 
 #if 0
   // Use the SourceLocation from Data to track deduplication, even if it's
@@ -106,22 +111,27 @@ static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
     (void)Opts;
 #endif
 
-  switch (ET) {
-  case ErrorType_NullPointerUse:
-  case ErrorType_NullPointerUseWithNullability:
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s null pointer of type %s", TypeCheckKinds[Data->TypeCheckKind], Data->Type->TypeName);
-    break;
-  case ErrorType_MisalignedPointerUse:
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s misaligned address 0x%X for type %s, "
-                        "which requires %i byte alignment", TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName, Alignment);
-    break;
-  case ErrorType_InsufficientObjectSize:
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s address 0x%X with insufficient space "
-                        "for an object of type %s", TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName);
-    break;
-  default:
-    UNREACHABLE("unexpected error type!");
-  }
+    switch (ET) {
+        case ErrorType_NullPointerUse:
+        case ErrorType_NullPointerUseWithNullability:
+            Ubsan_Diag(&Loc, DL_Error, ET, "%s null pointer of type %s", TypeCheckKinds[Data->TypeCheckKind],
+                       Data->Type->TypeName);
+            break;
+        case ErrorType_MisalignedPointerUse:
+            Ubsan_Diag(&Loc, DL_Error, ET,
+                       "%s misaligned address 0x%X for type %s, "
+                       "which requires %i byte alignment",
+                       TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName, Alignment);
+            break;
+        case ErrorType_InsufficientObjectSize:
+            Ubsan_Diag(&Loc, DL_Error, ET,
+                       "%s address 0x%X with insufficient space "
+                       "for an object of type %s",
+                       TypeCheckKinds[Data->TypeCheckKind], (void *)Pointer, Data->Type->TypeName);
+            break;
+        default:
+            UNREACHABLE("unexpected error type!");
+    }
 
 #if 0
   if (Pointer)
@@ -129,16 +139,14 @@ static void handleTypeMismatchImpl(TypeMismatchData *Data, ValueHandle Pointer,
 #endif
 }
 
-void __ubsan_handle_type_mismatch_v1(TypeMismatchData *Data,
-                                              ValueHandle Pointer) {
-  GET_REPORT_OPTIONS(false);
-  handleTypeMismatchImpl(Data, Pointer, Opts);
+void __ubsan_handle_type_mismatch_v1(TypeMismatchData *Data, ValueHandle Pointer) {
+    GET_REPORT_OPTIONS(false);
+    handleTypeMismatchImpl(Data, Pointer, Opts);
 }
-void __ubsan_handle_type_mismatch_v1_abort(TypeMismatchData *Data,
-                                                    ValueHandle Pointer) {
-  GET_REPORT_OPTIONS(true);
-  handleTypeMismatchImpl(Data, Pointer, Opts);
-  Die();
+void __ubsan_handle_type_mismatch_v1_abort(TypeMismatchData *Data, ValueHandle Pointer) {
+    GET_REPORT_OPTIONS(true);
+    handleTypeMismatchImpl(Data, Pointer, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -146,8 +154,6 @@ void __ubsan_handle_type_mismatch_v1_abort(TypeMismatchData *Data,
 | TypeMismatch
 |
 \\****************************************************************************/
-
-
 
 // TODO
 #if 0
@@ -167,8 +173,6 @@ void __ubsan_handle_alignment_assumption_abort(
 }
 #endif
 
-
-
 /****************************************************************************\\
 |
 | IntegerOverflow
@@ -182,13 +186,11 @@ void __ubsan_handle_alignment_assumption_abort(
 \\****************************************************************************/
 
 /// \brief Common diagnostic emission for various forms of integer overflow.
-static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS,
-                                      const char *Operator, ValueHandle RHS,
+static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS, const char *Operator, ValueHandle RHS,
                                       ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
     bool IsSigned = TypeDescriptor_isSignedIntegerTy(Data->Type);
-    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow
-                            : ErrorType_UnsignedIntegerOverflow;
+    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow : ErrorType_UnsignedIntegerOverflow;
 
 #if 0
     if (ignoreReport(Loc, Opts, ET))
@@ -204,17 +206,17 @@ static void handleIntegerOverflowImpl(OverflowData *Data, ValueHandle LHS,
     (void)Opts;
 #endif
 
-    Ubsan_Diag(&Loc, DL_Error, ET, "%s integer overflow: %i %s %i cannot be represented in type %s", (IsSigned ? "signed" : "unsigned"), LHS, Operator, RHS, Data->Type->TypeName);
+    Ubsan_Diag(&Loc, DL_Error, ET, "%s integer overflow: %i %s %i cannot be represented in type %s",
+               (IsSigned ? "signed" : "unsigned"), LHS, Operator, RHS, Data->Type->TypeName);
 }
 
-#define UBSAN_OVERFLOW_HANDLER(handler_name, op, unrecoverable)                \
-  void handler_name(OverflowData *Data, ValueHandle LHS,              \
-                             ValueHandle RHS) {                                \
-    GET_REPORT_OPTIONS(unrecoverable);                                         \
-    handleIntegerOverflowImpl(Data, LHS, op, RHS, Opts);    \
-    if (unrecoverable)                                                         \
-      Die();                                                                   \
-  }
+#define UBSAN_OVERFLOW_HANDLER(handler_name, op, unrecoverable)               \
+    void handler_name(OverflowData *Data, ValueHandle LHS, ValueHandle RHS) { \
+        GET_REPORT_OPTIONS(unrecoverable);                                    \
+        handleIntegerOverflowImpl(Data, LHS, op, RHS, Opts);                  \
+        if (unrecoverable)                                                    \
+            Die();                                                            \
+    }
 
 UBSAN_OVERFLOW_HANDLER(__ubsan_handle_add_overflow, "+", false)
 UBSAN_OVERFLOW_HANDLER(__ubsan_handle_add_overflow_abort, "+", true)
@@ -229,9 +231,6 @@ UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow_abort, "*", true)
 |
 \\****************************************************************************/
 
-
-
-
 /****************************************************************************\\
 |
 | NegateOverflow
@@ -243,14 +242,12 @@ UBSAN_OVERFLOW_HANDLER(__ubsan_handle_mul_overflow_abort, "*", true)
 |
 \\****************************************************************************/
 
-static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal,
-                                     ReportOptions Opts) {
+static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal, ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
     bool IsSigned = TypeDescriptor_isSignedIntegerTy(Data->Type);
-    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow
-                            : ErrorType_UnsignedIntegerOverflow;
+    ErrorType ET = IsSigned ? ErrorType_SignedIntegerOverflow : ErrorType_UnsignedIntegerOverflow;
 
-    #if 0
+#if 0
     if (ignoreReport(Loc, Opts, ET))
         return;
 
@@ -258,27 +255,28 @@ static void handleNegateOverflowImpl(OverflowData *Data, ValueHandle OldVal,
         return;
 
     ScopedReport R(Opts, Loc, ET);
-    #else
-        (void)Opts;
-    #endif
+#else
+    (void)Opts;
+#endif
 
     if (IsSigned) {
-        Ubsan_Diag(&Loc, DL_Error, ET, "negation of %i cannot be represented in type %s; cast to an unsigned type to negate this value to itself", OldVal, Data->Type->TypeName);
+        Ubsan_Diag(
+            &Loc, DL_Error, ET,
+            "negation of %i cannot be represented in type %s; cast to an unsigned type to negate this value to itself",
+            OldVal, Data->Type->TypeName);
     } else {
         Ubsan_Diag(&Loc, DL_Error, ET, "negation of %i cannot be represented in type %s", OldVal, Data->Type->TypeName);
     }
 }
 
-void __ubsan_handle_negate_overflow(OverflowData *Data,
-                                             ValueHandle OldVal) {
-  GET_REPORT_OPTIONS(false);
-  handleNegateOverflowImpl(Data, OldVal, Opts);
+void __ubsan_handle_negate_overflow(OverflowData *Data, ValueHandle OldVal) {
+    GET_REPORT_OPTIONS(false);
+    handleNegateOverflowImpl(Data, OldVal, Opts);
 }
-void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
-                                                    ValueHandle OldVal) {
-  GET_REPORT_OPTIONS(true);
-  handleNegateOverflowImpl(Data, OldVal, Opts);
-  Die();
+void __ubsan_handle_negate_overflow_abort(OverflowData *Data, ValueHandle OldVal) {
+    GET_REPORT_OPTIONS(true);
+    handleNegateOverflowImpl(Data, OldVal, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -286,8 +284,6 @@ void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
 | NegateOverflow
 |
 \\****************************************************************************/
-
-
 
 /****************************************************************************\\
 |
@@ -301,54 +297,52 @@ void __ubsan_handle_negate_overflow_abort(OverflowData *Data,
 |
 \\****************************************************************************/
 
-static void handleDivremOverflowImpl(OverflowData *Data, ValueHandle LHS,
-                                     ValueHandle RHS, ReportOptions Opts) {
+static void handleDivremOverflowImpl(OverflowData *Data, ValueHandle LHS, ValueHandle RHS, ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
 
     ErrorType ET;
-    if (Ubsan_Value_isMinusOne(Data->Type, RHS))
+    if (Ubsan_Value_isMinusOne(Data->Type, RHS)) {
         ET = ErrorType_SignedIntegerOverflow;
-    else if (TypeDescriptor_isIntegerTy(Data->Type))
+    } else if (TypeDescriptor_isIntegerTy(Data->Type)) {
         ET = ErrorType_IntegerDivideByZero;
-    else
+    } else {
         ET = ErrorType_FloatDivideByZero;
+    }
 
-    #if 0
+#if 0
     if (ignoreReport(Loc, Opts, ET))
         return;
 
     ScopedReport R(Opts, Loc, ET);
-    #else
-        (void)Opts;
-    #endif
+#else
+    (void)Opts;
+#endif
 
     switch (ET) {
-    case ErrorType_SignedIntegerOverflow:
-        Ubsan_Diag(&Loc, DL_Error, ET, "division of %i by -1 cannot be represented in type %s", LHS, Data->Type->TypeName);
-        break;
+        case ErrorType_SignedIntegerOverflow:
+            Ubsan_Diag(&Loc, DL_Error, ET, "division of %i by -1 cannot be represented in type %s", LHS,
+                       Data->Type->TypeName);
+            break;
 
-    case ErrorType_IntegerDivideByZero:
-    case ErrorType_FloatDivideByZero:
-        Ubsan_Diag(&Loc, DL_Error, ET, "division by zero");
-        break;
+        case ErrorType_IntegerDivideByZero:
+        case ErrorType_FloatDivideByZero:
+            Ubsan_Diag(&Loc, DL_Error, ET, "division by zero");
+            break;
 
-    default:
-        UNREACHABLE("unexpected error type!");
-        break;
+        default:
+            UNREACHABLE("unexpected error type!");
+            break;
     }
 }
 
-void __ubsan_handle_divrem_overflow(OverflowData *Data,
-                                             ValueHandle LHS, ValueHandle RHS) {
-  GET_REPORT_OPTIONS(false);
-  handleDivremOverflowImpl(Data, LHS, RHS, Opts);
+void __ubsan_handle_divrem_overflow(OverflowData *Data, ValueHandle LHS, ValueHandle RHS) {
+    GET_REPORT_OPTIONS(false);
+    handleDivremOverflowImpl(Data, LHS, RHS, Opts);
 }
-void __ubsan_handle_divrem_overflow_abort(OverflowData *Data,
-                                                    ValueHandle LHS,
-                                                    ValueHandle RHS) {
-  GET_REPORT_OPTIONS(true);
-  handleDivremOverflowImpl(Data, LHS, RHS, Opts);
-  Die();
+void __ubsan_handle_divrem_overflow_abort(OverflowData *Data, ValueHandle LHS, ValueHandle RHS) {
+    GET_REPORT_OPTIONS(true);
+    handleDivremOverflowImpl(Data, LHS, RHS, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -356,9 +350,6 @@ void __ubsan_handle_divrem_overflow_abort(OverflowData *Data,
 | DivremOverflow
 |
 \\****************************************************************************/
-
-
-
 
 /****************************************************************************\\
 |
@@ -373,17 +364,17 @@ void __ubsan_handle_divrem_overflow_abort(OverflowData *Data,
 |
 \\****************************************************************************/
 
-static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data,
-                                       ValueHandle LHS, ValueHandle RHS,
+static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data, ValueHandle LHS, ValueHandle RHS,
                                        ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
 
     ErrorType ET;
     if (Ubsan_Value_isNegative(Data->RHSType, RHS) ||
-        Ubsan_Value_getPositiveIntValue(Data->RHSType, RHS) >= TypeDescriptor_getIntegerBitWidth(Data->LHSType))
+        Ubsan_Value_getPositiveIntValue(Data->RHSType, RHS) >= TypeDescriptor_getIntegerBitWidth(Data->LHSType)) {
         ET = ErrorType_InvalidShiftExponent;
-    else
+    } else {
         ET = ErrorType_InvalidShiftBase;
+    }
 
 #if 0
     if (ignoreReport(Loc, Opts, ET))
@@ -398,31 +389,27 @@ static void handleShiftOutOfBoundsImpl(ShiftOutOfBoundsData *Data,
         if (Ubsan_Value_isNegative(Data->RHSType, RHS)) {
             Ubsan_Diag(&Loc, DL_Error, ET, "shift exponent %i is negative", RHS);
         } else {
-            Ubsan_Diag(&Loc, DL_Error, ET, "shift exponent %i is too large for %i-bit type %s", RHS, TypeDescriptor_getIntegerBitWidth(Data->LHSType), Data->LHSType->TypeName);
+            Ubsan_Diag(&Loc, DL_Error, ET, "shift exponent %i is too large for %i-bit type %s", RHS,
+                       TypeDescriptor_getIntegerBitWidth(Data->LHSType), Data->LHSType->TypeName);
         }
     } else {
         if (Ubsan_Value_isNegative(Data->LHSType, LHS)) {
             Ubsan_Diag(&Loc, DL_Error, ET, "left shift of negative value %i", LHS);
         } else {
-            Ubsan_Diag(&Loc, DL_Error, ET,
-                "left shift of %i by %i places cannot be represented in type %s", LHS, RHS, Data->LHSType->TypeName);
+            Ubsan_Diag(&Loc, DL_Error, ET, "left shift of %i by %i places cannot be represented in type %s", LHS, RHS,
+                       Data->LHSType->TypeName);
         }
     }
 }
 
-void __ubsan_handle_shift_out_of_bounds(ShiftOutOfBoundsData *Data,
-                                                 ValueHandle LHS,
-                                                 ValueHandle RHS) {
-  GET_REPORT_OPTIONS(false);
-  handleShiftOutOfBoundsImpl(Data, LHS, RHS, Opts);
+void __ubsan_handle_shift_out_of_bounds(ShiftOutOfBoundsData *Data, ValueHandle LHS, ValueHandle RHS) {
+    GET_REPORT_OPTIONS(false);
+    handleShiftOutOfBoundsImpl(Data, LHS, RHS, Opts);
 }
-void __ubsan_handle_shift_out_of_bounds_abort(
-                                                     ShiftOutOfBoundsData *Data,
-                                                     ValueHandle LHS,
-                                                     ValueHandle RHS) {
-  GET_REPORT_OPTIONS(true);
-  handleShiftOutOfBoundsImpl(Data, LHS, RHS, Opts);
-  Die();
+void __ubsan_handle_shift_out_of_bounds_abort(ShiftOutOfBoundsData *Data, ValueHandle LHS, ValueHandle RHS) {
+    GET_REPORT_OPTIONS(true);
+    handleShiftOutOfBoundsImpl(Data, LHS, RHS, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -430,10 +417,6 @@ void __ubsan_handle_shift_out_of_bounds_abort(
 | ShiftOutOfBounds
 |
 \\****************************************************************************/
-
-
-
-
 
 /****************************************************************************\\
 |
@@ -447,8 +430,7 @@ void __ubsan_handle_shift_out_of_bounds_abort(
 |
 \\****************************************************************************/
 
-static void handleOutOfBoundsImpl(OutOfBoundsData *Data, ValueHandle Index,
-                                  ReportOptions Opts) {
+static void handleOutOfBoundsImpl(OutOfBoundsData *Data, ValueHandle Index, ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
 
     ErrorType ET = ErrorType_OutOfBoundsIndex;
@@ -465,13 +447,11 @@ static void handleOutOfBoundsImpl(OutOfBoundsData *Data, ValueHandle Index,
     Ubsan_Diag(&Loc, DL_Error, ET, "index %i out of bounds for type %s", Index, Data->ArrayType->TypeName);
 }
 
-void __ubsan_handle_out_of_bounds(OutOfBoundsData *Data,
-                                           ValueHandle Index) {
+void __ubsan_handle_out_of_bounds(OutOfBoundsData *Data, ValueHandle Index) {
     GET_REPORT_OPTIONS(false);
     handleOutOfBoundsImpl(Data, Index, Opts);
 }
-void __ubsan_handle_out_of_bounds_abort(OutOfBoundsData *Data,
-                                                 ValueHandle Index) {
+void __ubsan_handle_out_of_bounds_abort(OutOfBoundsData *Data, ValueHandle Index) {
     GET_REPORT_OPTIONS(true);
     handleOutOfBoundsImpl(Data, Index, Opts);
     Die();
@@ -482,8 +462,6 @@ void __ubsan_handle_out_of_bounds_abort(OutOfBoundsData *Data,
 | OutOfBounds
 |
 \\****************************************************************************/
-
-
 
 #if 0
 void __ubsan_handle_builtin_unreachable(UnreachableData *Data) {
@@ -515,7 +493,6 @@ void __ubsan_handle_vla_bound_not_positive_abort(VLABoundData *Data,
 }
 #endif
 
-
 /****************************************************************************\\
 |
 | FloatCastOverflow
@@ -528,49 +505,45 @@ void __ubsan_handle_vla_bound_not_positive_abort(VLABoundData *Data,
 \\****************************************************************************/
 
 static bool looksLikeFloatCastOverflowDataV1(void *Data) {
-  // First field is either a pointer to filename or a pointer to a
-  // TypeDescriptor.
-  u8 *FilenameOrTypeDescriptor;
-  N64Wrapper_Memcpy(&FilenameOrTypeDescriptor, Data,
-                  sizeof(FilenameOrTypeDescriptor));
+    // First field is either a pointer to filename or a pointer to a
+    // TypeDescriptor.
+    u8 *FilenameOrTypeDescriptor;
+    N64Wrapper_Memcpy(&FilenameOrTypeDescriptor, Data, sizeof(FilenameOrTypeDescriptor));
 
-  // Heuristic: For float_cast_overflow, the TypeKind will be either TK_Integer
-  // (0x0), TK_Float (0x1) or TK_Unknown (0xff). If both types are known,
-  // adding both bytes will be 0 or 1 (for BE or LE). If it were a filename,
-  // adding two printable characters will not yield such a value. Otherwise,
-  // if one of them is 0xff, this is most likely TK_Unknown type descriptor.
-  u16 MaybeFromTypeKind =
-      FilenameOrTypeDescriptor[0] + FilenameOrTypeDescriptor[1];
-  return MaybeFromTypeKind < 2 || FilenameOrTypeDescriptor[0] == 0xff ||
-         FilenameOrTypeDescriptor[1] == 0xff;
+    // Heuristic: For float_cast_overflow, the TypeKind will be either TK_Integer
+    // (0x0), TK_Float (0x1) or TK_Unknown (0xff). If both types are known,
+    // adding both bytes will be 0 or 1 (for BE or LE). If it were a filename,
+    // adding two printable characters will not yield such a value. Otherwise,
+    // if one of them is 0xff, this is most likely TK_Unknown type descriptor.
+    u16 MaybeFromTypeKind = FilenameOrTypeDescriptor[0] + FilenameOrTypeDescriptor[1];
+    return MaybeFromTypeKind < 2 || FilenameOrTypeDescriptor[0] == 0xff || FilenameOrTypeDescriptor[1] == 0xff;
 }
 
-static void handleFloatCastOverflow(void *DataPtr, ValueHandle From,
-                                    ReportOptions Opts) {
-    #if 0
+static void handleFloatCastOverflow(void *DataPtr, ValueHandle From, ReportOptions Opts) {
+#if 0
     SymbolizedStackHolder CallerLoc;
-    #endif
+#endif
     Ubsan_Location Loc;
     const TypeDescriptor *FromType, *ToType;
     ErrorType ET = ErrorType_FloatCastOverflow;
 
     if (looksLikeFloatCastOverflowDataV1(DataPtr)) {
-        #if 0
+#if 0
         FloatCastOverflowData* Data = (FloatCastOverflowData*)DataPtr;
         CallerLoc.reset(getCallerLocation(Opts.pc));
         Loc = CallerLoc;
         FromType = &Data->FromType;
         ToType = &Data->ToType;
-        #else
+#else
         N64Wrapper_Assert("FloatCastOverflowDataV1 is not implemented\n", __FILE__, __LINE__);
         return;
-        #endif
+#endif
     } else {
-        FloatCastOverflowDataV2* Data = (FloatCastOverflowDataV2*)DataPtr;
-    #if 0
+        FloatCastOverflowDataV2 *Data = (FloatCastOverflowDataV2 *)DataPtr;
+#if 0
         if (ignoreReport(SLoc, Opts, ET))
             return;
-    #endif
+#endif
         // Loc = { LK_Source, { Data->Loc } };
         Loc.Kind = LK_Source;
         Loc.SourceLoc = Data->Loc;
@@ -587,23 +560,25 @@ static void handleFloatCastOverflow(void *DataPtr, ValueHandle From,
 
     // TODO: figure out a way to prevent code duplication
     if (TypeDescriptor_isFloatTy(FromType)) {
-        Ubsan_Diag(&Loc, DL_Error, ET, "%f (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getFloatValue(FromType, From), FromType->TypeName, ToType->TypeName);
+        Ubsan_Diag(&Loc, DL_Error, ET, "%f (from type %s) is outside the range of representable values of type %s",
+                   Ubsan_Value_getFloatValue(FromType, From), FromType->TypeName, ToType->TypeName);
     } else if (TypeDescriptor_isUnsignedIntegerTy(FromType)) {
-        Ubsan_Diag(&Loc, DL_Error, ET, "%lu (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getUIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
+        Ubsan_Diag(&Loc, DL_Error, ET, "%lu (from type %s) is outside the range of representable values of type %s",
+                   Ubsan_Value_getUIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
     } else {
-        Ubsan_Diag(&Loc, DL_Error, ET, "%li (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getSIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
+        Ubsan_Diag(&Loc, DL_Error, ET, "%li (from type %s) is outside the range of representable values of type %s",
+                   Ubsan_Value_getSIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
     }
 }
 
 void __ubsan_handle_float_cast_overflow(void *Data, ValueHandle From) {
-  GET_REPORT_OPTIONS(false);
-  handleFloatCastOverflow(Data, From, Opts);
+    GET_REPORT_OPTIONS(false);
+    handleFloatCastOverflow(Data, From, Opts);
 }
-void __ubsan_handle_float_cast_overflow_abort(void *Data,
-                                                       ValueHandle From) {
-  GET_REPORT_OPTIONS(true);
-  handleFloatCastOverflow(Data, From, Opts);
-  Die();
+void __ubsan_handle_float_cast_overflow_abort(void *Data, ValueHandle From) {
+    GET_REPORT_OPTIONS(true);
+    handleFloatCastOverflow(Data, From, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -611,7 +586,6 @@ void __ubsan_handle_float_cast_overflow_abort(void *Data,
 | FloatCastOverflow
 |
 \\****************************************************************************/
-
 
 #if 0
 void __ubsan_handle_load_invalid_value(InvalidValueData *Data,
@@ -716,9 +690,6 @@ void __ubsan_handle_nullability_arg_abort(NonNullArgData *Data) {
 }
 #endif
 
-
-
-
 /****************************************************************************\\
 |
 | PointerOverflow
@@ -730,22 +701,21 @@ void __ubsan_handle_nullability_arg_abort(NonNullArgData *Data) {
 |
 \\****************************************************************************/
 
-static void handlePointerOverflowImpl(PointerOverflowData *Data,
-                                      ValueHandle Base,
-                                      ValueHandle Result,
+static void handlePointerOverflowImpl(PointerOverflowData *Data, ValueHandle Base, ValueHandle Result,
                                       ReportOptions Opts) {
     Ubsan_Location Loc = { LK_Source, { Data->Loc } };
 
     ErrorType ET;
 
-    if (Base == 0 && Result == 0)
+    if (Base == 0 && Result == 0) {
         ET = ErrorType_NullptrWithOffset;
-    else if (Base == 0 && Result != 0)
+    } else if (Base == 0 && Result != 0) {
         ET = ErrorType_NullptrWithNonZeroOffset;
-    else if (Base != 0 && Result == 0)
+    } else if (Base != 0 && Result == 0) {
         ET = ErrorType_NullptrAfterNonZeroOffset;
-    else
+    } else {
         ET = ErrorType_PointerOverflow;
+    }
 
 #if 0
     if (ignoreReport(Loc, Opts, ET))
@@ -764,28 +734,27 @@ static void handlePointerOverflowImpl(PointerOverflowData *Data,
         Ubsan_Diag(&Loc, DL_Error, ET, "applying non-zero offset to non-null pointer %X produced null pointer", Base);
     } else if (((intptr_t)(Base) >= 0) == ((intptr_t)(Result) >= 0)) {
         if (Base > Result) {
-            Ubsan_Diag(&Loc, DL_Error, ET, "addition of unsigned offset to %X overflowed to %X", (void *)Base, (void *)Result);
+            Ubsan_Diag(&Loc, DL_Error, ET, "addition of unsigned offset to %X overflowed to %X", (void *)Base,
+                       (void *)Result);
         } else {
-            Ubsan_Diag(&Loc, DL_Error, ET, "subtraction of unsigned offset from %X overflowed to %X", (void *)Base, (void *)Result);
+            Ubsan_Diag(&Loc, DL_Error, ET, "subtraction of unsigned offset from %X overflowed to %X", (void *)Base,
+                       (void *)Result);
         }
     } else {
-        Ubsan_Diag(&Loc, DL_Error, ET, "pointer index expression with base %X overflowed to %X", (void *)Base, (void *)Result);
+        Ubsan_Diag(&Loc, DL_Error, ET, "pointer index expression with base %X overflowed to %X", (void *)Base,
+                   (void *)Result);
     }
 }
 
-void __ubsan_handle_pointer_overflow(PointerOverflowData *Data,
-                                              ValueHandle Base,
-                                              ValueHandle Result) {
-  GET_REPORT_OPTIONS(false);
-  handlePointerOverflowImpl(Data, Base, Result, Opts);
+void __ubsan_handle_pointer_overflow(PointerOverflowData *Data, ValueHandle Base, ValueHandle Result) {
+    GET_REPORT_OPTIONS(false);
+    handlePointerOverflowImpl(Data, Base, Result, Opts);
 }
 
-void __ubsan_handle_pointer_overflow_abort(PointerOverflowData *Data,
-                                                    ValueHandle Base,
-                                                    ValueHandle Result) {
-  GET_REPORT_OPTIONS(true);
-  handlePointerOverflowImpl(Data, Base, Result, Opts);
-  Die();
+void __ubsan_handle_pointer_overflow_abort(PointerOverflowData *Data, ValueHandle Base, ValueHandle Result) {
+    GET_REPORT_OPTIONS(true);
+    handlePointerOverflowImpl(Data, Base, Result, Opts);
+    Die();
 }
 
 /****************************************************************************\\
@@ -793,9 +762,6 @@ void __ubsan_handle_pointer_overflow_abort(PointerOverflowData *Data,
 | PointerOverflow
 |
 \\****************************************************************************/
-
-
-
 
 #if 0
 
