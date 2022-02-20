@@ -129,10 +129,11 @@ N64_ASAN                     := libn64_asan.a
 N64_UBSAN                    := libn64_ubsan.a
 N64_WRAPPER                  := libn64_wrapper.a
 
-TARGET_LIBS                  := $(N64_ASAN) $(N64_UBSAN) $(N64_WRAPPER)
+# TARGET_LIBS                  := $(N64_ASAN) $(N64_UBSAN) $(N64_WRAPPER)
+TARGET_LIBS                  := $(N64_UBSAN) $(N64_WRAPPER)
 
-$(N64_ASAN):    $(O_FILES_N64_ASAN)
-$(N64_UBSAN):   $(O_FILES_N64_UBSAN)
+$(N64_ASAN):    $(O_FILES_N64_ASAN)    | $(N64_WRAPPER)
+$(N64_UBSAN):   $(O_FILES_N64_UBSAN)   | $(N64_WRAPPER)
 $(N64_WRAPPER): $(O_FILES_N64_WRAPPER)
 
 # create build directories
