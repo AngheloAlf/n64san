@@ -42,5 +42,8 @@ The following is a list of compiler flags which _should_ be supported by this ru
 - `-fsanitize=float-divide-by-zero`
   - Detect floating-point division by zero. Unlike other similar options, `-fsanitize=float-divide-by-zero` is not enabled by `-fsanitize=undefined`, since floating-point division by zero can be a legitimate way of obtaining infinities and NaNs.
 
+- `-fsanitize=float-cast-overflow`
+  - This option enables floating-point type to integer conversion checking. We check that the result of the conversion does not overflow. Unlike other similar options, `-fsanitize=float-cast-overflow` is not enabled by `-fsanitize=undefined`. This option does not work well with FE_INVALID exceptions enabled.
+
 - `-fsanitize=pointer-overflow`
   - This option enables instrumentation of pointer arithmetics. If the pointer arithmetics overflows, a run-time error is issued.

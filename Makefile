@@ -4,8 +4,8 @@ MAKEFLAGS += --no-builtin-rules
 
 # 
 GAME = OOT
-# if WERROR is 1, compile source files with -Werror
-WERROR ?= 0
+# if WERROR is non-zero, compile source files with -Werror
+WERROR ?= 1
 # 
 SAN_DEBUG ?= 0
 

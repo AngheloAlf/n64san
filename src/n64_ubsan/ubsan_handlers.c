@@ -11,6 +11,7 @@
 
 #include "sanitizer_common/sanitizer_common.h"
 
+#include "n64_wrapper/n64_wrapper.h"
 
 
 /****************************************************************************\\
@@ -512,7 +513,7 @@ void __ubsan_handle_vla_bound_not_positive_abort(VLABoundData *Data,
   handleVLABoundNotPositive(Data, Bound, Opts);
   Die();
 }
-
+#endif
 
 
 /****************************************************************************\\
@@ -525,6 +526,74 @@ void __ubsan_handle_vla_bound_not_positive_abort(VLABoundData *Data,
 |  -fsanitize=float-cast-overflow
 |
 \\****************************************************************************/
+
+static bool looksLikeFloatCastOverflowDataV1(void *Data) {
+  // First field is either a pointer to filename or a pointer to a
+  // TypeDescriptor.
+  u8 *FilenameOrTypeDescriptor;
+  N64Wrapper_Memcpy(&FilenameOrTypeDescriptor, Data,
+                  sizeof(FilenameOrTypeDescriptor));
+
+  // Heuristic: For float_cast_overflow, the TypeKind will be either TK_Integer
+  // (0x0), TK_Float (0x1) or TK_Unknown (0xff). If both types are known,
+  // adding both bytes will be 0 or 1 (for BE or LE). If it were a filename,
+  // adding two printable characters will not yield such a value. Otherwise,
+  // if one of them is 0xff, this is most likely TK_Unknown type descriptor.
+  u16 MaybeFromTypeKind =
+      FilenameOrTypeDescriptor[0] + FilenameOrTypeDescriptor[1];
+  return MaybeFromTypeKind < 2 || FilenameOrTypeDescriptor[0] == 0xff ||
+         FilenameOrTypeDescriptor[1] == 0xff;
+}
+
+static void handleFloatCastOverflow(void *DataPtr, ValueHandle From,
+                                    ReportOptions Opts) {
+    #if 0
+    SymbolizedStackHolder CallerLoc;
+    #endif
+    Ubsan_Location Loc;
+    const TypeDescriptor *FromType, *ToType;
+    ErrorType ET = ErrorType_FloatCastOverflow;
+
+    if (looksLikeFloatCastOverflowDataV1(DataPtr)) {
+        #if 0
+        FloatCastOverflowData* Data = (FloatCastOverflowData*)DataPtr;
+        CallerLoc.reset(getCallerLocation(Opts.pc));
+        Loc = CallerLoc;
+        FromType = &Data->FromType;
+        ToType = &Data->ToType;
+        #else
+        N64Wrapper_Assert("FloatCastOverflowDataV1 is not implemented\n", __FILE__, __LINE__);
+        return;
+        #endif
+    } else {
+        FloatCastOverflowDataV2* Data = (FloatCastOverflowDataV2*)DataPtr;
+    #if 0
+        if (ignoreReport(SLoc, Opts, ET))
+            return;
+    #endif
+        // Loc = { LK_Source, { Data->Loc } };
+        Loc.Kind = LK_Source;
+        Loc.SourceLoc = Data->Loc;
+
+        FromType = Data->FromType;
+        ToType = Data->ToType;
+    }
+
+#if 0
+  ScopedReport R(Opts, Loc, ET);
+#else
+    (void)Opts;
+#endif
+
+    // TODO: figure out a way to prevent code duplication
+    if (TypeDescriptor_isFloatTy(FromType)) {
+        Ubsan_Diag(&Loc, DL_Error, ET, "%f (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getFloatValue(FromType, From), FromType->TypeName, ToType->TypeName);
+    } else if (TypeDescriptor_isUnsignedIntegerTy(FromType)) {
+        Ubsan_Diag(&Loc, DL_Error, ET, "%lu (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getUIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
+    } else {
+        Ubsan_Diag(&Loc, DL_Error, ET, "%li (from type %s) is outside the range of representable values of type %s", Ubsan_Value_getSIntValue(FromType, From), FromType->TypeName, ToType->TypeName);
+    }
+}
 
 void __ubsan_handle_float_cast_overflow(void *Data, ValueHandle From) {
   GET_REPORT_OPTIONS(false);
@@ -544,7 +613,7 @@ void __ubsan_handle_float_cast_overflow_abort(void *Data,
 \\****************************************************************************/
 
 
-
+#if 0
 void __ubsan_handle_load_invalid_value(InvalidValueData *Data,
                                                 ValueHandle Val) {
   GET_REPORT_OPTIONS(false);
