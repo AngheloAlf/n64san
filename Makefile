@@ -94,8 +94,8 @@ ASFLAGS        := -march=vr4300 -32 -Iinclude
 
 SRC_DIRS_N64_SAN_COMMON      := $(shell find src/n64_sanitizer_common -type d)
 
-SRC_DIRS_N64_ASAN            := $(shell find src/n64_asan -type d) $(SRC_DIRS_N64_SAN_COMMON)
 SRC_DIRS_N64_UBSAN           := $(shell find src/n64_ubsan -type d) $(SRC_DIRS_N64_SAN_COMMON)
+SRC_DIRS_N64_ASAN            := $(shell find src/n64_asan -type d) $(SRC_DIRS_N64_SAN_COMMON)
 SRC_DIRS_N64_WRAPPER         := $(shell find src/n64_wrapper -type d)
 
 SRC_DIRS_ALL                 := $(SRC_DIRS_N64_ASAN) $(SRC_DIRS_N64_UBSAN) $(SRC_DIRS_N64_WRAPPER)
@@ -103,10 +103,10 @@ SRC_DIRS_ALL                 := $(SRC_DIRS_N64_ASAN) $(SRC_DIRS_N64_UBSAN) $(SRC
 
 ASM_DIRS_N64_SAN_COMMON      := $(shell find asm/n64_sanitizer_common -type d)
 
-# ASM_DIRS_N64_ASAN            := $(shell find asm/n64_asan -type d) $(ASM_DIRS_N64_SAN_COMMON)
-ASM_DIRS_N64_ASAN            := $(ASM_DIRS_N64_SAN_COMMON)
 # ASM_DIRS_N64_UBSAN           := $(shell find asm/n64_ubsan -type d) $(ASM_DIRS_N64_SAN_COMMON)
 ASM_DIRS_N64_UBSAN           := $(ASM_DIRS_N64_SAN_COMMON)
+# ASM_DIRS_N64_ASAN            := $(shell find asm/n64_asan -type d) $(ASM_DIRS_N64_SAN_COMMON)
+ASM_DIRS_N64_ASAN            := $(ASM_DIRS_N64_SAN_COMMON)
 # ASM_DIRS_N64_WRAPPER         := $(shell find asm/n64_wrapper -type d)
 ASM_DIRS_N64_WRAPPER         := 
 
@@ -114,19 +114,19 @@ ASM_DIRS_ALL                 := $(ASM_DIRS_N64_ASAN) $(ASM_DIRS_N64_UBSAN) $(ASM
 
 
 # source files
-C_FILES_N64_ASAN             := $(foreach dir,$(SRC_DIRS_N64_ASAN),$(wildcard $(dir)/*.c))
-CXX_FILES_N64_ASAN           := $(foreach dir,$(SRC_DIRS_N64_ASAN),$(wildcard $(dir)/*.cpp))
-S_FILES_N64_ASAN             := $(foreach dir,$(ASM_DIRS_N64_ASAN),$(wildcard $(dir)/*.s))
-O_FILES_N64_ASAN             := $(foreach f,$(S_FILES_N64_ASAN:.s=.o),build/$f) \
-                                $(foreach f,$(C_FILES_N64_ASAN:.c=.o),build/$f) \
-                                $(foreach f,$(CXX_FILES_N64_ASAN:.cpp=.o),build/$f)
-
 C_FILES_N64_UBSAN            := $(foreach dir,$(SRC_DIRS_N64_UBSAN),$(wildcard $(dir)/*.c))
 CXX_FILES_N64_UBSAN          := $(foreach dir,$(SRC_DIRS_N64_UBSAN),$(wildcard $(dir)/*.cpp))
 S_FILES_N64_UBSAN            := $(foreach dir,$(ASM_DIRS_N64_UBSAN),$(wildcard $(dir)/*.s))
 O_FILES_N64_UBSAN            := $(foreach f,$(S_FILES_N64_UBSAN:.s=.o),build/$f) \
                                 $(foreach f,$(C_FILES_N64_UBSAN:.c=.o),build/$f) \
                                 $(foreach f,$(CXX_FILES_N64_UBSAN:.cpp=.o),build/$f)
+
+C_FILES_N64_ASAN             := $(foreach dir,$(SRC_DIRS_N64_ASAN),$(wildcard $(dir)/*.c))
+CXX_FILES_N64_ASAN           := $(foreach dir,$(SRC_DIRS_N64_ASAN),$(wildcard $(dir)/*.cpp))
+S_FILES_N64_ASAN             := $(foreach dir,$(ASM_DIRS_N64_ASAN),$(wildcard $(dir)/*.s))
+O_FILES_N64_ASAN             := $(foreach f,$(S_FILES_N64_ASAN:.s=.o),build/$f) \
+                                $(foreach f,$(C_FILES_N64_ASAN:.c=.o),build/$f) \
+                                $(foreach f,$(CXX_FILES_N64_ASAN:.cpp=.o),build/$f)
 
 C_FILES_N64_WRAPPER          := $(foreach dir,$(SRC_DIRS_N64_WRAPPER),$(wildcard $(dir)/*.c))
 CXX_FILES_N64_WRAPPER        := $(foreach dir,$(SRC_DIRS_N64_WRAPPER),$(wildcard $(dir)/*.cpp))
@@ -135,15 +135,14 @@ O_FILES_N64_WRAPPER          := $(foreach f,$(S_FILES_N64_WRAPPER:.s=.o),build/$
                                 $(foreach f,$(C_FILES_N64_WRAPPER:.c=.o),build/$f) \
                                 $(foreach f,$(CXX_FILES_N64_WRAPPER:.cpp=.o),build/$f)
 
-N64_ASAN                     := libn64_asan.a
 N64_UBSAN                    := libn64_ubsan.a
+N64_ASAN                     := libn64_asan.a
 N64_WRAPPER                  := libn64_wrapper.a
 
-# TARGET_LIBS                  := $(N64_ASAN) $(N64_UBSAN) $(N64_WRAPPER)
-TARGET_LIBS                  := $(N64_UBSAN) $(N64_WRAPPER)
+TARGET_LIBS                  := $(N64_UBSAN) $(N64_ASAN) $(N64_WRAPPER)
 
-$(N64_ASAN):    $(O_FILES_N64_ASAN)    | $(N64_WRAPPER)
 $(N64_UBSAN):   $(O_FILES_N64_UBSAN)   | $(N64_WRAPPER)
+$(N64_ASAN):    $(O_FILES_N64_ASAN)    | $(N64_WRAPPER)
 $(N64_WRAPPER): $(O_FILES_N64_WRAPPER)
 
 # create build directories
