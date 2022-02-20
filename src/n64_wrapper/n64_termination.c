@@ -1,9 +1,8 @@
 #include "n64_wrapper/n64_termination.h"
 
+GAME_INTERNAL_FUNCTION void NORETURN __assert(const char* exp, const char* file, s32 line);
 
-void NORETURN __assert(const char* exp, const char* file, s32 line);
 
-
-void NORETURN N64Wrapper_Abort(const char* file, s32 line) {
-    __assert("ASAN Abort", file, line);
+void NORETURN N64Wrapper_Assert(const char* exp, const char* file, s32 line) {
+    __assert(exp, file, line);
 }

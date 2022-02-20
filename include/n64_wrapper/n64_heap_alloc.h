@@ -13,4 +13,11 @@ void N64Wrapper_Heap_InitArena();
 // void N64Wrapper_Heap_Cleanup(void);
 bool N64Wrapper_Heap_IsInitialized(void);
 
+#ifndef N64WRAPPER_HEAP_ARENASIZE
+#define N64WRAPPER_HEAP_ARENASIZE 0x100
+#endif
+#ifndef N64WRAPPER_HEAP_HEAPSIZE
+#define N64WRAPPER_HEAP_HEAPSIZE  0x2000
+#endif
+
 #endif

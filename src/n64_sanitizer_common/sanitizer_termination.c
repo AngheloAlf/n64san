@@ -7,8 +7,7 @@
 
 
 void NORETURN Die() {
-    N64Wrapper_Printf("SAN: Die()\n");
-    N64Wrapper_Abort(__FILE__, __LINE__);
+    N64Wrapper_Assert("SAN: Die()\n", __FILE__, __LINE__);
 }
 
 // TODO
@@ -24,5 +23,5 @@ void NORETURN CheckFailed(const char *file, int line, const char *cond,
             SanitizerToolName, file, line, cond, v1,
             v2, tid);
 
-    N64Wrapper_Abort(file, line);
+    N64Wrapper_Assert(cond, file, line);
 }

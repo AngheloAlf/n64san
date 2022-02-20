@@ -142,6 +142,7 @@ $(shell mkdir -p $(foreach dir,$(SRC_DIRS_ALL) $(ASM_DIRS_ALL),build/$(dir)))
 #### Main Targets ###
 
 all: $(TARGET_LIBS)
+	@echo "Done"
 
 clean:
 	$(RM) -r build
