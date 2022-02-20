@@ -4,7 +4,7 @@
 /**
  * Based on llvm-project
  * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_diag.h
- * 
+ *
  * Diagnostics emission for Clang's undefined behavior sanitizer.
  */
 

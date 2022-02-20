@@ -4,7 +4,7 @@
 /**
  * Based on llvm-project
  * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/sanitizer_common/sanitizer_internal_defs.h
- * 
+ *
  * Contains macro used in run-time libraries code.
  */
 

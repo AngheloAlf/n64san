@@ -4,7 +4,7 @@
 /**
  * Based on llvm-project
  * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_handlers.h
- * 
+ *
  * Entry points to the runtime library for Clang's undefined behavior sanitizer.
  */
 

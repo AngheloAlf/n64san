@@ -4,7 +4,7 @@
 /**
  * Based on llvm-project
  * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_value.h
- * 
+ *
  * Representation of data which is passed from the compiler-generated calls into
  * the ubsan runtime.
  */

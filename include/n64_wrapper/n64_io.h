@@ -7,7 +7,7 @@
  * Takes a null-terminated C string pointed by `fmt` and prints it.
  * `fmt` may contain format specifiers, in which case the following arguments will be inserted in the resulting string.
  * The format specifiers should be, at minimum, C89 compatible.
- * 
+ *
  * Where the resulting string is printed to is game dependent.
  */
 void N64Wrapper_Vprintf(const char *fmt, va_list args);

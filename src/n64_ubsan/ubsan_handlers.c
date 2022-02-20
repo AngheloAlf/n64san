@@ -1,7 +1,7 @@
 /**
  * Based on llvm-project
  * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_handlers.cpp
- * 
+ *
  * Error logging entry points for the UBSan runtime.
  */
 

@@ -5,7 +5,7 @@
 
 /**
  * Triggers the termination of the program (possibly leading to a crash handler or similar).
- * 
+ *
  * This function may print `exp`, `file` and `line`.
  * Where those arguments are printed to is game dependent.
  */
