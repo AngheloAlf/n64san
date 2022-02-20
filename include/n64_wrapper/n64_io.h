@@ -3,12 +3,21 @@
 
 #include "n64_utils.h"
 
+/**
+ * Takes a null-terminated C string pointed by `fmt` and prints it.
+ * `fmt` may contain format specifiers, in which case the following arguments will be inserted in the resulting string.
+ * The format specifiers should be, at minimum, C89 compatible.
+ * 
+ * Where the resulting string is printed to is game dependent.
+ */
 void N64Wrapper_Vprintf(const char *fmt, va_list args);
 void N64Wrapper_Printf(const char *fmt, ...);
 
-// Like Printf, but prints the current PID before the output string.
-void N64Wrapper_Report(const char *fmt, ...);
-
+/**
+ * Takes a null-terminated C string pointed by `fmt` and and writes the results to `dst`.
+ * `fmt` may contain format specifiers, in which case the following arguments will be inserted in the resulting string.
+ * The format specifiers should be, at minimum, C89 compatible.
+ */
 s32 N64Wrapper_Vsprintf(char *dst, const char *fmt, va_list args);
 s32 N64Wrapper_Sprintf(char *dst, const char *fmt, ...);
 

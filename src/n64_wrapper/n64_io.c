@@ -21,17 +21,6 @@ void N64Wrapper_Printf(const char *fmt, ...) {
     va_end(args);
 }
 
-// Like Printf, but prints the current PID before the output string.
-void N64Wrapper_Report(const char *fmt, ...) {
-    // This implementation does not print the current PID
-    va_list args;
-    va_start(args, fmt);
-
-    N64Wrapper_Vprintf(fmt, args);
-
-    va_end(args);
-}
-
 s32 N64Wrapper_Vsprintf(char *dst, const char *fmt, va_list args) {
     return vsprintf(dst, fmt, args);
 }
