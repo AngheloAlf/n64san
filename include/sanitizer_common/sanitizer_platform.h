@@ -2,6 +2,9 @@
 #define SANITIZER_PLATFORM_H
 
 /**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
+ * 
  * Common platform macros.
  */
 

@@ -1,3 +1,8 @@
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/sanitizer_common/sanitizer_termination.cpp
+ */
+
 #include "global_headers/libc.h"
 #include "global_headers/ultra64.h"
 

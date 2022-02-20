@@ -1,6 +1,11 @@
 #ifndef SANITIZER_STACKTRACE_H
 #define SANITIZER_STACKTRACE_H
 
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/sanitizer_common/sanitizer_stacktrace.h
+ */
+
 #include "sanitizer_common.h"
 #include "sanitizer_internal_defs.h"
 #include "sanitizer_platform.h"

@@ -1,3 +1,8 @@
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/asan/asan_report.cpp
+ */
+
 #include "asan/asan_report.h"
 #include "n64_wrapper/n64_wrapper.h"
 

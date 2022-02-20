@@ -1,3 +1,10 @@
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/asan/asan_fake_stack.cpp
+ * 
+ * FakeStack is used to detect use-after-return bugs.
+ */
+
 #include "global_headers/libc.h"
 #include "global_headers/ultra64.h"
 

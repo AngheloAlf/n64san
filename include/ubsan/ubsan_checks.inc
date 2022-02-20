@@ -1,4 +1,7 @@
 /**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_checks.inc
+ * 
  * List of checks handled by UBSan runtime.
  */
 

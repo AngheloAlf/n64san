@@ -1,4 +1,7 @@
 /**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_diag.cpp
+ * 
  * Diagnostic reporting for the UBSan runtime.
  */
 

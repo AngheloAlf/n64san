@@ -1,3 +1,11 @@
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/ubsan/ubsan_value.cpp
+ * 
+ * Representation of data which is passed from the compiler-generated calls into
+ * the ubsan runtime.
+ */
+
 #include "ubsan/ubsan_value.h"
 #include "sanitizer_common/asm.h"
 

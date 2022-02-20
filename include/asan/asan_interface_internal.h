@@ -1,6 +1,11 @@
 #ifndef ASAN_INTERFACE_INTERNAL_H
 #define ASAN_INTERFACE_INTERNAL_H
 
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/asan/asan_interface_internal.h
+ */
+
 #include "sanitizer_common/sanitizer_internal_defs.h"
 
 SANITIZER_INTERFACE_ATTRIBUTE

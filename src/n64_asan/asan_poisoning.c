@@ -1,3 +1,10 @@
+/**
+ * Based on llvm-project
+ * https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/asan/asan_poisoning.cpp
+ * 
+ * Shadow memory poisoning by ASan RTL and by user application.
+ */
+
 #include "global_headers/libc.h"
 #include "global_headers/ultra64.h"
 
