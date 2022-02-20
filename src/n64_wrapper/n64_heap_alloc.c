@@ -2,6 +2,12 @@
 #include "n64_wrapper/alignment.h"
 #include "n64_wrapper/n64_string.h"
 
+// This module is not required by every sanitizer, so there's no point in building it by default.
+// Also, if it isn't going to be used, then this heap would be dead space in the resulting binary.
+#if ENABLE_N64WRAPPER_HEAP_ALLOC
+
+#if TARGET_GAME_OOT
+
 // Arena with arbitrary size that should be enough for most cases
 STACK(gN64Wrapper_Heap_Arena, N64WRAPPER_HEAP_ARENASIZE);
 // The heap
@@ -68,3 +74,7 @@ void N64Wrapper_Heap_Cleanup(void) {
 bool N64Wrapper_Heap_IsInitialized(void) {
     return __osMallocIsInitalized(&gN64Wrapper_Heap_Arena);
 }
+
+#endif
+
+#endif /* ENABLE_N64WRAPPER_HEAP_ALLOC */

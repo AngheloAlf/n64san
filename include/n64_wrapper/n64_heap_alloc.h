@@ -1,6 +1,8 @@
 #ifndef N64_HEAP_ALLOC_H
 #define N64_HEAP_ALLOC_H
 
+#if ENABLE_N64WRAPPER_HEAP_ALLOC
+
 #include "n64_utils.h"
 
 void* N64Wrapper_Heap_Malloc(size_t size);
@@ -19,5 +21,7 @@ bool N64Wrapper_Heap_IsInitialized(void);
 #ifndef N64WRAPPER_HEAP_HEAPSIZE
 #define N64WRAPPER_HEAP_HEAPSIZE  0x2000
 #endif
+
+#endif /* ENABLE_N64WRAPPER_HEAP_ALLOC */
 
 #endif

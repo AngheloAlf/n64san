@@ -2,6 +2,8 @@ MAKEFLAGS += --no-builtin-rules
 
 # Build options can either be changed by modifying the makefile, or by building with 'make SETTING=value'
 
+# 
+GAME = OOT
 # if WERROR is 1, compile source files with -Werror
 WERROR ?= 0
 # 
@@ -70,9 +72,17 @@ ifneq ($(SAN_DEBUG), 0)
     COMMON_DEFINES += -DSANITIZER_DEBUG=1
 endif
 
+ifeq ($(GAME), OOT)
+    COMMON_DEFINES += -DTARGET_GAME_OOT=1
+else
+    $(error Invalid GAME option selected)
+endif
+
+# COMMON_DEFINES += -DENABLE_N64WRAPPER_HEAP_ALLOC=1
+
 COMMON_FLAGS   := -G 0 $(INC) $(COMMON_DEFINES) -funsigned-char -ffreestanding -fno-common -fexec-charset=euc-jp -mno-abicalls -mdivide-breaks -mno-explicit-relocs -mno-split-addresses
 CFLAGS         += $(COMMON_FLAGS) -nostdinc -std=c11 $(C_WARNINGS)
-CXXFLAGS       += $(COMMON_FLAGS) -nostdinc++ -std=c++17 -fno-exceptions -fno-rtti $(CXX_WARNINGS)
+CXXFLAGS       += $(COMMON_FLAGS) -nostdinc++ -std=c++14 -fno-exceptions -fno-rtti $(CXX_WARNINGS)
 
 
 ## Assembly flags

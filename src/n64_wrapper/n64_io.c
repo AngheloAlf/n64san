@@ -1,5 +1,7 @@
 #include "n64_wrapper/n64_io.h"
 
+#if TARGET_GAME_OOT
+
 GAME_INTERNAL_FUNCTION void* is_proutSyncPrintf(void* arg, const char* str, u32 count);
 GAME_INTERNAL_FUNCTION s32 _Printf(PrintCallback pfn, void* arg, const char* fmt, va_list ap);
 
@@ -46,3 +48,5 @@ s32 N64Wrapper_Sprintf(char* dst, const char* fmt, ...) {
 
     return ret;
 }
+
+#endif
