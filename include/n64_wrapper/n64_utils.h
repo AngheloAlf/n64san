@@ -10,6 +10,10 @@
 #define NORETURN __attribute__((noreturn))
 #endif
 
+#ifndef UNUSED
+#define UNUSED __attribute__((unused))
+#endif
+
 #define GAME_INTERNAL_FUNCTION
 
 #endif

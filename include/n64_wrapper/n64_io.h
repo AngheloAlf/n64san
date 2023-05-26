@@ -10,8 +10,8 @@
  *
  * Where the resulting string is printed to is game dependent.
  */
-void N64Wrapper_Vprintf(const char *fmt, va_list args);
-void N64Wrapper_Printf(const char *fmt, ...);
+int N64Wrapper_Vprintf(const char *fmt, va_list args);
+int N64Wrapper_Printf(const char *fmt, ...);
 
 /**
  * Takes a null-terminated C string pointed by `fmt` and and writes the results to `dst`.

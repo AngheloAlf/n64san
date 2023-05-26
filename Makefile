@@ -74,6 +74,8 @@ endif
 
 ifeq ($(GAME), OOT)
     COMMON_DEFINES += -DTARGET_GAME_OOT=1
+else ifeq ($(GAME), MM)
+    COMMON_DEFINES += -DTARGET_GAME_MM=1
 else
     $(error Invalid GAME option selected)
 endif
